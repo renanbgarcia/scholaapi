@@ -15,21 +15,21 @@ app.get('/hello', function(req, res) {
 });
 
 app.post('/signup', function(req, res) {
-    fireapi.admin.auth().createUser({
-        email: req.body.email,
-        password: req.body.password,
-        displayName: req.body.displayName,
-        disabled: false
+  fireapi.admin.auth().createUser({
+      email: req.body.email,
+      password: req.body.password,
+      displayName: req.body.displayName,
+      disabled: false
+    })
+      .then(function(userRecord) {
+        console.log('Successfully created new user:', userRecord.uid);
+        setUserExtraInfo(userRecord);
       })
-        .then(function(userRecord) {
-          console.log('Successfully created new user:', userRecord.uid);
-          setUserExtraInfo(userRecord.uid);
-        })
-        .catch(function(error) {
-          console.log('Error creating new user:', error);
-        });
+      .catch(function(error) {
+        console.log('Error creating new user:', error);
+      });
 
-      res.send({"message": 'Usuário criado com sucesso!',"code": 200});
+    res.send({"message": 'Usuário criado com sucesso!',"code": 200});
 });
 
 app.post('/updateuser', function(req, res) {
@@ -63,15 +63,15 @@ app.post('/savedata', function(req, res) {
 /**
  * Para ser usada na criação do usuário no Firebase Auth, para
  * criar o usuário no Firestore
- * @param {uid from firebase} userRecord 
+ * @param {user from firebase} userRecord 
  */
 function setUserExtraInfo(userRecord) {
     let db = fireapi.admin.firestore();
-
     let docRef = db.collection('users').doc(userRecord.uid);
 
-    let setAda = docRef.set({
-        displayName: userRecord.displayName ? userRecord.displayName : null,
+    docRef.set({
+        displayName: userRecord.displayName,
+        email: userRecord.email
     });
 }
 
