@@ -10,52 +10,56 @@ app.use(bodyParser.json());
 
 /** Routes **/
 
-app.get('/hello', function(req, res) {
-    res.send('Hello everybody!!!');
+app.get('/hello', function (req, res) {
+  res.send('Hello everybody!!!');
 });
 
-app.post('/signup', function(req, res) {
+app.post('/signup', function (req, res) {
   fireapi.admin.auth().createUser({
       email: req.body.email,
       password: req.body.password,
-      displayName: req.body.displayName,
-      disabled: false
+      displayName: req.body.displayName
     })
-      .then(function(userRecord) {
-        console.log('Successfully created new user:', userRecord.uid);
-        setUserExtraInfo(userRecord);
+    .catch(function (error) {
+      console.log('Error creating new user:', error);
+      res.status(500).send({
+        message: `Erro ao cadastrar: ${error.message}`
       })
-      .catch(function(error) {
-        console.log('Error creating new user:', error);
+    })
+    .then(function (userRecord) {
+      console.log('Successfully created new user:', userRecord.uid);
+      setUserExtraInfo(userRecord);
+      res.send({
+        "message": 'Usuário criado com sucesso!',
+        "code": 200
       });
-
-    res.send({"message": 'Usuário criado com sucesso!',"code": 200});
+    })
 });
 
-app.post('/updateuser', function(req, res) {
-    fireapi.admin.auth().updateUser(req.body.uid, {
-        displayName: 'Jane Doe',
-        photoURL: 'http://www.example.com/12345678/photo.png',
-      })
-        .then(function(userRecord) {
-          console.log('Successfully updated user', userRecord.toJSON());
-        })
-        .catch(function(error) {
-          console.log('Error updating user:', error);
-        });
+app.post('/updateuser', function (req, res) {
+  fireapi.admin.auth().updateUser(req.body.uid, {
+      displayName: 'Jane Doe',
+      photoURL: 'http://www.example.com/12345678/photo.png',
+    })
+    .then(function (userRecord) {
+      console.log('Successfully updated user', userRecord.toJSON());
+    })
+    .catch(function (error) {
+      console.log('Error updating user:', error);
+    });
 })
 
 /** teste Será deletado */
-app.post('/savedata', function(req, res) {
-    let db = fireapi.admin.firestore();
+app.post('/savedata', function (req, res) {
+  let db = fireapi.admin.firestore();
 
-    let docRef = db.collection('users').doc('alovelace');
+  let docRef = db.collection('users').doc('alovelace');
 
-    let setAda = docRef.set({
-        first: 'Ada',
-        last: 'Lovelace',
-        born: 1815
-    });
+  let setAda = docRef.set({
+    first: 'Ada',
+    last: 'Lovelace',
+    born: 1815
+  });
 })
 
 /*** Functions ***/
@@ -66,15 +70,15 @@ app.post('/savedata', function(req, res) {
  * @param {user from firebase} userRecord 
  */
 function setUserExtraInfo(userRecord) {
-    let db = fireapi.admin.firestore();
-    let docRef = db.collection('users').doc(userRecord.uid);
+  let db = fireapi.admin.firestore();
+  let docRef = db.collection('users').doc(userRecord.uid);
 
-    docRef.set({
-        displayName: userRecord.displayName,
-        email: userRecord.email
-    });
+  docRef.set({
+    displayName: userRecord.displayName,
+    email: userRecord.email
+  });
 }
 
-app.listen(3000, function() {
-    console.log('App listening on port 3000!');
+app.listen(3005, function () {
+  console.log('App listening on port 3005!');
 });
